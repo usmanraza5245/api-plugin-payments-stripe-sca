@@ -51,12 +51,11 @@ export default async function createStripePaymentIntent(
       /* eslint-disable camelcase */
       payment_method_types: ["card"],
       /* eslint-disable camelcase */
-      capture_method: "manual",
       metadata: {
-        integration_check: "accept_a_payment"
-      } /* eslint-disable camelcase */
+        integration_check: "accept_a_payment",
+      } /* eslint-disable camelcase */,
     });
-
+    console.log("paymentInetent....", paymentIntent);
     return paymentIntent.client_secret;
   } catch (error) {
     throw new ReactionError("invalid-payment", error.message);

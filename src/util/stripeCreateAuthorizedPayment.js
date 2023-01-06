@@ -4,7 +4,7 @@ import {
   METHOD,
   PAYMENT_METHOD_NAME,
   PROCESSOR,
-  riskLevelMap
+  riskLevelMap,
 } from "./constants.js";
 import getStripeInstance from "./getStripeInstance.js";
 
@@ -18,13 +18,17 @@ export default async function stripeCreateAuthorizedPayment(context, input) {
   const {
     billingAddress,
     shopId,
-    paymentData: { stripePaymentIntentId }
+    paymentData: { stripePaymentIntentId },
   } = input;
 
   const stripe = await getStripeInstance(context);
 
   const intent = await stripe.paymentIntents.retrieve(stripePaymentIntentId);
-  const charges = intent.charges.data;
+  const chargedData = await stripe.charges.retrieve(intent.latest_charge);
+  const charges = [chargedData];
+  console.log("charged data...", charges);
+  console.log("payment intent....", intent);
+  // const charges = intent.charges.data;
 
   return {
     _id: Random.id(),
@@ -34,7 +38,7 @@ export default async function stripeCreateAuthorizedPayment(context, input) {
     data: {
       stripePaymentIntentId,
       intent,
-      gqlType: "StripePaymentData" // GraphQL union resolver uses this
+      gqlType: "StripePaymentData", // GraphQL union resolver uses this
     },
     displayName: "Stripe Payment",
     method: METHOD,
@@ -49,6 +53,6 @@ export default async function stripeCreateAuthorizedPayment(context, input) {
     shopId,
     status: "created",
     transactionId: stripePaymentIntentId,
-    transactions: charges
+    transactions: charges,
   };
 }
